@@ -1,0 +1,1 @@
+Análisis de datos reales aplicados a distintos tópicos de economía mediante el uso de herramientas de programación (R-studio). Elaboración de modelos econométricos Arima de impuestos para realizar proyecciones económicas sobre la recaudación tributaria.
