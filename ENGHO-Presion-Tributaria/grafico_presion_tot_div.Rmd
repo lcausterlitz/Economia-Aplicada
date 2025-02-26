@@ -1,0 +1,133 @@
+---
+title: "Presión tributaria del IVA"
+output: 
+  html_document: default
+    
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+library(tidyverse)
+library(ggthemes)
+library(foreign)
+library(svglite)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(magrittr)
+library(readr)
+library(date)
+library(writexl)
+library(zoo)
+library(scales)
+library(data.table)
+library(httr)
+library(openxlsx)
+library(foreign)
+
+
+
+setwd("C:/Users/DELL/OneDrive/Desktop/MECON/ENGHO")
+
+base_graficos <- read_excel("base_final_presion_iva.xlsx")
+
+# Definir las divisiones
+divisiones <- c(
+  "A01" = "Alimentos y bebidas no alcohólicas",
+  "A02" = "Bebidas alcohólicas, tabaco y estupefacientes",
+  "A03" = "Prendas de vestir y calzado",
+  "A04" = "Vivienda, agua, electricidad, gas y otros combustibles",
+  "A05" = "Muebles, artículos para el hogar y mantenimiento del hogar",
+  "A06" = "Salud",
+  "A07" = "Transporte",
+  "A08" = "Comunicación",
+  "A09" = "Recreación y cultura",
+  "A10" = "Educación",
+  "A11" = "Restaurantes y hoteles",
+  "A12" = "Bienes y servicios diversos"
+)
+```
+
+
+
+```{r echo=FALSE}
+grafico_presion <- ggplot(base_graficos, aes(x = decil, y = presion_total)) +
+    geom_line(color = "steelblue", linewidth = 1.2) +
+    geom_point(size = 4, color = "darkblue") +
+    geom_text(aes(label = scales::percent(presion_total, accuracy = 0.1)), 
+              vjust = -1, color = "black", size = 4) +
+    scale_x_continuous(breaks = 1:10) +
+    scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0.05, 0.2))) +
+    labs(x = "Decil de Ingreso", y = "Presión Tributaria (%)", 
+         title = "Presión Tributaria por Decil de Ingreso") +   # Cambié el paste() por texto simple
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold", margin = margin(b = 15)),
+      axis.title.x = element_text(size = 12, face = "bold"),
+      axis.title.y = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 11),
+      panel.grid.major = element_line(color = "gray85"),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.margin = unit(c(1, 1, 4, 1), "lines")
+    )
+
+print(grafico_presion)
+
+```
+
+## Presión Tributaria por División de Bienes y Servicios
+
+
+```{r echo=FALSE}
+
+# Definir los nombres completos de las divisiones
+nombres_divisiones <- c(
+  "A01" = "Alimentos y bebidas no alcohólicas",
+  "A02" = "Bebidas alcohólicas, tabaco y estupefacientes",
+  "A03" = "Prendas de vestir y calzado",
+  "A04" = "Vivienda, agua, electricidad, gas y otros combustibles",
+  "A05" = "Muebles, artículos para el hogar y mantenimiento del hogar",
+  "A06" = "Salud",
+  "A07" = "Transporte",
+  "A08" = "Comunicación",
+  "A09" = "Recreación y cultura",
+  "A10" = "Educación",
+  "A11" = "Restaurantes y hoteles",
+  "A12" = "Bienes y servicios diversos"
+)
+
+# Definir las divisiones a graficar
+divisiones <- c("A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12")
+
+
+# Crear los gráficos en un bucle
+for (div in divisiones) {
+  nombre_completo <- nombres_divisiones[div]
+  
+  grafico_presion_div <- ggplot(base_graficos, aes(x = decil, y = .data[[paste0("presion_", div)]])) +
+    geom_line(color = "steelblue", linewidth = 1.2) +
+    geom_point(size = 4, color = "darkblue") +
+    geom_text(aes(label = scales::percent(.data[[paste0("presion_", div)]], accuracy = 0.1)), 
+              vjust = -1, color = "black", size = 4) +
+    scale_x_continuous(breaks = 1:10) +
+    scale_y_continuous(labels = scales::percent, expand = expansion(mult = c(0.05, 0.2))) +
+    labs(x = "Decil de Ingreso", y = "Presión Tributaria (%)", 
+         title = nombre_completo) +   # Usar el nombre completo de la división
+    theme_minimal() +
+    theme(
+      plot.title = element_text(hjust = 0.5, size = 14, face = "bold", margin = margin(b = 15)),
+      axis.title.x = element_text(size = 12, face = "bold"),
+      axis.title.y = element_text(size = 12, face = "bold"),
+      axis.text = element_text(size = 11),
+      panel.grid.major = element_line(color = "gray85"),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "white", color = NA),
+      plot.margin = unit(c(1, 1, 4, 1), "lines")
+    )
+  
+  print(grafico_presion_div)
+}
+
+```
+
