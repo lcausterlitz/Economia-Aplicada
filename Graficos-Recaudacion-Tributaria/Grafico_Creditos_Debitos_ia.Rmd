@@ -1,0 +1,50 @@
+---
+title: "Debitos y Créditos Real Desestacionalizado y EMAE"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Cargar las librerÃ­as necesarias
+library(readxl)
+library(x13binary)
+library(seasonal)
+library(dygraphs)
+library(xts)
+source("Grafico_Creditos_Debitos_ia.R")
+source("EMAE.R")
+```
+
+
+```{r echo=FALSE}
+# Convertir el EMAE a xts (asegÃºrate de que el formato de fechas coincida)
+EMAE_xts <- xts(EMAE_interanual$Var_Interanual_Trimestral, order.by = EMAE$Fecha)
+
+C_y_D_interanual_xts <- xts(C_y_D_interanual[, c("Var_Interanual_deses", "Var_Interanual_Trimestral")], order.by = C_y_D_interanual$Fecha)
+
+# Combinar las series de Var i.a y EMAE
+C_y_D_interanual_EMAE_xts <- merge(C_y_D_interanual_xts, EMAE_xts)
+
+grafico_dinamico_variaciones_CyD <- dygraph(C_y_D_interanual_EMAE_xts, main = "Variación Interanual y acumulado cada 3 meses") %>%
+  dyAxis("y", label = "Variación (%)", 
+         valueFormatter = "function(x) {
+           return x.toFixed(1) + '%';  
+         }") %>%
+  dyAxis("x", label = "Fecha",
+         axisLabelWidth = 70,
+         axisLabelFormatter = "function(d) {
+           var monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+           return monthNames[d.getMonth()] + ' ' + d.getFullYear();
+         }") %>%
+  dySeries("Var_Interanual_deses", label = "Var i.a Débitos y Créditos", color = "darkblue", strokeWidth = 2) %>%
+  dySeries("EMAE_xts", label = "Var i.a EMAE  acumulado 3 meses", color = "green", strokeWidth = 2) %>%
+  dySeries("Var_Interanual_Trimestral", label = "Var i.a Débitos y Créditos acumulado 3 meses", color = "red", strokePattern = "dashed", strokeWidth = 2) %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE, pointSize = 2, maxNumberWidth = 7) %>%
+  dyLegend(show = "always", hideOnMouseOut = FALSE, labelsSeparateLines = TRUE) %>%  # Leyenda siempre visible
+  dyOptions(axisLineColor = "black", gridLineColor = "transparent") # Ocultar lÃ­neas de la cuadrÃ­cula
+
+# Mostrar el grÃ¡fico
+grafico_dinamico_variaciones_CyD
+
+```
+

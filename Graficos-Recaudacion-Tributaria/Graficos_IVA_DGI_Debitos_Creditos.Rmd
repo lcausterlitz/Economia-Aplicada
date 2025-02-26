@@ -1,0 +1,99 @@
+---
+title: "Gráficos Impuestos"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+# Cargar las librerÃ­as necesarias
+library(readxl)
+library(x13binary)
+library(seasonal)
+library(dygraphs)
+library(xts)
+source("Grafico_IVA_DGI.R", encoding = "UTF-8")
+source("Grafico_Creditos_Debitos.R", encoding = "UTF-8")
+```
+
+
+
+
+
+```{r, echo=FALSE}
+# Convertir ambas columnas a un objeto xts
+IVA_desest_xts <- xts(IVA_desest[, c("IVA_DGI_deflactado", "IVA_DGI_SIN_EST")], order.by = IVA_desest$Fecha)
+
+# Crear el grÃ¡fico dinÃ¡mico usando dygraph
+grafico_dinamico_IVA <- dygraph(IVA_desest_xts, main = "IVA DGI Real: Con y Sin Estacionalidad") %>%
+  dyAxis("y", label = "Millones de ARS $ de oct-24") %>%
+  dyAxis("x", label = "Fecha") %>%
+  dySeries("IVA_DGI_deflactado", label = "Serie Original", color = "darkblue", strokeWidth = 2) %>%
+  dySeries("IVA_DGI_SIN_EST", label = "Serie Desestacionalizada", color = "red", strokePattern = "dashed", strokeWidth = 2) %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE, pointSize = 2, maxNumberWidth = 7) %>%
+  dyLegend(show = "always", hideOnMouseOut = FALSE, labelsSeparateLines = TRUE) %>%  # Leyenda siempre visible
+  dyOptions(axisLineColor = "transparent", gridLineColor = "transparent") %>% # Ocultar lÃ­neas de la cuadrÃ­cula
+  dyOptions(labelsKMB = TRUE) #Mantener eje Y en 1M,2M,etc y evitar notacion cientifica
+# Mostrar el grÃ¡fic
+grafico_dinamico_IVA
+#######
+# Convertir ambas columnas a un objeto xts
+Cred_y_Deb_desest_xts <- xts(Cred_y_Deb_SIN_EST[, c("Cred_y_Deb_deflactado", "Cred_y_Deb_SIN_EST")], order.by = Cred_y_Deb_SIN_EST$Fecha)
+
+# Crear el grÃ¡fico dinÃ¡mico usando dygraph
+grafico_dinamico_Cred_y_Deb <- dygraph(Cred_y_Deb_desest_xts, main = "Creditos y Debitos Real: Con y Sin Estacionalidad") %>%
+  dyAxis("y", label = "Millones de ARS $ de oct-24") %>%
+  dyAxis("x", label = "Fecha") %>%
+  dySeries("Cred_y_Deb_deflactado", label = "Serie Original", color = "#00BFFF", strokeWidth = 2) %>%
+  dySeries("Cred_y_Deb_SIN_EST", label = "Serie Desestacionalizada", color = "darkorange", strokePattern = "dashed", strokeWidth = 2) %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE, pointSize = 2, maxNumberWidth = 7) %>%
+  dyLegend(show = "always", hideOnMouseOut = FALSE, labelsSeparateLines = TRUE) %>%  # Leyenda siempre visible
+  dyOptions(axisLineColor = "transparent", gridLineColor = "transparent") %>% # Ocultar lÃ­neas de la cuadrÃ­cula
+  dyOptions(labelsKMB = TRUE) ########Mantener eje Y en 1M,2M,etc y evitar notacion cientifica!!!!
+# Mostrar el grÃ¡fico
+grafico_dinamico_Cred_y_Deb
+############
+# Crear un objeto xts para el grÃ¡fico
+IVA_variaciones_xts <- xts(IVA_variaciones[, -1], order.by = IVA_variaciones$Fecha)
+
+# Crear el grÃ¡fico dinÃ¡mico usando dygraph
+grafico_dinamico_variaciones_IVA <- dygraph(IVA_variaciones_xts, main = "IVA DGI: variacion real MoM") %>%
+  dyAxis("y", label = "Variacion (%)", 
+         valueFormatter = "function(x) {
+           return x.toFixed(1) + '%';  // Formato para mostrar en porcentaje
+         }") %>%
+  dyAxis("x", label = "Fecha") %>%
+  dySeries("Variacion_IVA_DGI", label = "Variacion Serie Original", color = "darkblue", strokeWidth = 2) %>%
+  dySeries("Variacion_IVA_DGI_SIN_EST", label = "Variacion Serie Desestacionalizada", color = "red", strokePattern = "dashed", strokeWidth = 2) %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE, pointSize = 2, maxNumberWidth = 7) %>%
+  dyLegend(show = "always", hideOnMouseOut = FALSE, labelsSeparateLines = TRUE) %>%  # Leyenda siempre visible
+  dyOptions(axisLineColor = "black", gridLineColor = "transparent") # Ocultar lÃ­neas de la cuadrÃ­cula
+
+# Mostrar el grÃ¡fico
+grafico_dinamico_variaciones_IVA
+###########
+# Crear un objeto xts para el grÃ¡fico
+Cred_y_Deb_variaciones_xts <- xts(Cred_y_Deb_variaciones[, -1], order.by = Cred_y_Deb_variaciones$Fecha)
+
+# Crear el grÃ¡fico dinÃ¡mico usando dygraph
+grafico_dinamico_variaciones_Cred_y_Deb <- dygraph(Cred_y_Deb_variaciones_xts, main = "Creditos y Debitos variacion real MoM") %>%
+  dyAxis("y", label = "Variacion (%)", 
+         valueFormatter = "function(x) {
+           return x.toFixed(1) + '%';  // Formato para mostrar en porcentaje
+         }") %>%
+  dyAxis("x", label = "Fecha") %>%
+  dySeries("Variacion_Cred_y_Deb", label = "Variacion Serie Original", color = "#00BFFF", strokeWidth = 2) %>%
+  dySeries("Variacion_Cred_y_Deb_SIN_EST", label = "Variacion Serie Desestacionalizada", color = "darkorange", strokePattern = "dashed", strokeWidth = 2) %>%
+  dyRangeSelector() %>%
+  dyOptions(drawPoints = TRUE, pointSize = 2, maxNumberWidth = 7) %>%
+  dyLegend(show = "always", hideOnMouseOut = FALSE, labelsSeparateLines = TRUE) %>%  # Leyenda siempre visible
+  dyOptions(axisLineColor = "black", gridLineColor = "transparent") # Ocultar lÃ­neas de la cuadrÃ­cula
+
+# Mostrar el grÃ¡fico
+grafico_dinamico_variaciones_Cred_y_Deb
+
+```
+
+
+
